@@ -1,10 +1,12 @@
 package com.example.security.controller;
 
 import com.example.security.model.UserEntity;
-import com.example.security.model.UserSaveRequest;
+import com.example.security.model.UserDto;
 import com.example.security.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class IndexController {
 
     private final UserEntityRepository userEntityRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @GetMapping({"", "/"})
     public String index() {
@@ -47,14 +50,24 @@ public class IndexController {
     }
 
     @GetMapping("/joinForm")
-    public String joinForm(@ModelAttribute("user") UserSaveRequest request) {
+    public String joinForm(@ModelAttribute("user") UserDto userDto) {
         return "joinForm";
     }
 
     @PostMapping("/join")
-    @ResponseBody
-    public String join(@ModelAttribute UserSaveRequest request) {
-        userEntityRepository.save(UserEntity.of(request.getUsername(), request.getPassword(), request.getEmail(), "ROLE_USER"));
-        return "join";
+    public String join(@ModelAttribute UserDto userDto) {
+        userDto.setRole("ROLE_USER");
+
+        String encPassword = bCryptPasswordEncoder.encode(userDto.getPassword());
+        userEntityRepository.save(UserEntity.of(userDto.getUsername(), encPassword, userDto.getEmail(), userDto.getRole()));
+        return "redirect:/loginForm";
     }
-}
+
+
+    @GetMapping("/info")
+    @Secured("ROLE_ADMIN")
+    @ResponseBody
+    public String info() {
+        return "개인정보";
+    }
+ }
