@@ -3,18 +3,17 @@ package com.example.security.config.auth;
 import com.example.security.model.UserDto;
 import com.example.security.model.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 
 /**
  * 시큐리티가 /login 낚아채서 로그인을 진행시킨다.
  * 이때 로그인이 완료가 되면 session 을 만들어서 넣어준다.
- * Security 는 Security Context Holder 라는 이 KEY 값에 session 정보를 저장한다.
+ * Security 는 Security Context Holder 라는 공간에 유저 정보를 저장한다.
+ * 저장할 때, KEY 값에 session 정보를 저장한다.
  * 이 session 에 들어갈 수 있는 객체는 정해져 있다 => Authentication 타입 객체
  * Authentication 안에 User 정보가 있어야 내가 활용할 수 있다.
  *
@@ -31,9 +30,9 @@ import java.util.List;
 
 public class PrincipalDetails implements UserDetails {
     //컴포지션으로 User(또는 DTO) 사용
-    private UserEntity user;
+    private UserDto user;
 
-    public PrincipalDetails(UserEntity user) {
+    public PrincipalDetails(UserDto user) {
         this.user = user;
     }
 
