@@ -1,11 +1,14 @@
 package com.example.security.controller;
 
+import com.example.security.config.auth.PrincipalDetails;
 import com.example.security.model.UserEntity;
 import com.example.security.model.UserDto;
 import com.example.security.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +31,12 @@ public class IndexController {
 
     @GetMapping("/user")
     @ResponseBody
-    public String user() {
+    public String user(Authentication authentication) {
+        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
+
+        log.info("authentication.getPrincipal()={}", authentication.getPrincipal());
+        log.info("principal.getUsername()={}", principal.getUsername());
+        log.info("principal.getPassword()={}", principal.getPassword());
         return "user";
     }
 
