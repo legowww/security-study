@@ -2,11 +2,14 @@ package com.example.security.config.auth;
 
 import com.example.security.model.UserDto;
 import com.example.security.model.UserEntity;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 
 /**
@@ -28,14 +31,25 @@ import java.util.Collection;
  * session <= Authentication(UserDetails)
  */
 
-public class PrincipalDetails implements UserDetails {
+public class PrincipalDetails implements UserDetails, OAuth2User {
     //컴포지션으로 User(또는 DTO) 사용
-    private UserDto user;
+    @Getter private UserDto user;
 
     public PrincipalDetails(UserDto user) {
         this.user = user;
     }
 
+    //Oauth2User Method
+    @Override
+    public String getName() {
+        return null;
+    }
+    @Override
+    public Map<String, Object> getAttributes() {
+        return null;
+    }
+
+    //UserDetails Method
     //해당 User 의 권한을 리턴하는 곳
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,6 +1,8 @@
 package com.example.security.config;
 
 
+import com.example.security.config.oauth.PrincipalOauth2UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +13,10 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true) // secured 어노테이션 활성화 -> @Secured("ROLE_ADMIN") 붙은 메서드
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final PrincipalOauth2UserService principalOauth2UserService;
 
     //리턴되는 오브젝트를 IOC 에 등록해준다.
     @Bean
@@ -37,8 +42,14 @@ public class SecurityConfig {
                 )
                 .formLogin()
                     .loginPage("/loginForm") //authenticated 되기 위해 로그인이 필요할 경우 해당 url 로 이동
-                    .loginProcessingUrl("/login") //login 주소로 post 되면 security 가 낚아채서 대신 로그인 진행
-                    .defaultSuccessUrl("/") //security 에서 로그인 성공하면 해당 url 로 이동
+                    .loginProcessingUrl("/login") // "/login" 주소로 post 요청이 날아가면 Security 가 낚아채서 대신 로그인 진행
+                    .defaultSuccessUrl("/") //Security 에서 로그인 성공하면 해당 url 로 이동
+                .and()
+                .oauth2Login()
+                    .loginPage("/loginForm") //구글 로그인 완료된 뒤 후처리 필요. 액세스토큰+사용자프로필정보 받음
+                    .userInfoEndpoint()
+                    .userService(principalOauth2UserService) //principalOauth2UserService 의 loadUser() 메서드에서 후처리
+                    .and()
                 .and()
                 .build();
     }

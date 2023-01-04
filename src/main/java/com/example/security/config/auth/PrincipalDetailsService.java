@@ -32,8 +32,7 @@ public class PrincipalDetailsService implements UserDetailsService {
         UserDto userDto = userEntityRepository.findByUsername(username).map(UserDto::fromEntity).orElseThrow(() ->
                 new UsernameNotFoundException("user not founded"));
 
-        // 시큐리티 session 내부에 Authentication(UserDetails 가 들어간 상태) 가 들어가게 된다.
-        // 리턴값이 Authentication 에 들어가서 Authentication(PrincipalDetails) 상태가 된다.
+        // 리턴값이 Authentication 에 들어가서 Authentication(PrincipalDetails(useDto))를 만들고
         // 그리고 Authentication 이 시큐리티 session 에 저장된다.
         // 이 작업을 loadUserByUsername 가 수행해준다.
         return new PrincipalDetails(userDto);

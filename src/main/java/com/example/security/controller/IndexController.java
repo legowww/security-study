@@ -9,7 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -24,6 +26,30 @@ public class IndexController {
     private final UserEntityRepository userEntityRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+
+    @GetMapping("/test/login")
+    @ResponseBody
+    public String testLogin(Authentication authentication,
+                            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
+        log.info("authentication.getPrincipal()={}", principal.getUser());
+        log.info("userDetails={}", principalDetails.getUser());
+
+        return "세션정보활용하기";
+    }
+
+    @GetMapping("/test/oauth/login")
+    @ResponseBody
+    public String testOauthLogin(Authentication authentication,
+                                 @AuthenticationPrincipal OAuth2User user) {
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        log.info("authentication.getPrincipal()={}", oAuth2User.getAttributes());
+        log.info("user={}", user.getAttributes());
+
+        return "Oauth 세션정보활용하기";
+    }
+
+
     @GetMapping({"", "/"})
     public String index() {
         return "index";
@@ -32,11 +58,6 @@ public class IndexController {
     @GetMapping("/user")
     @ResponseBody
     public String user(Authentication authentication) {
-        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-
-        log.info("authentication.getPrincipal()={}", authentication.getPrincipal());
-        log.info("principal.getUsername()={}", principal.getUsername());
-        log.info("principal.getPassword()={}", principal.getPassword());
         return "user";
     }
 
