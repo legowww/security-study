@@ -1,6 +1,9 @@
 package com.example.security.config.oauth;
 
 import com.example.security.config.auth.PrincipalDetails;
+import com.example.security.config.oauth.provider.GoogleUserInfo;
+import com.example.security.config.oauth.provider.NaverUserInfo;
+import com.example.security.config.oauth.provider.Oauth2UserInfo;
 import com.example.security.model.UserDto;
 import com.example.security.model.UserEntity;
 import com.example.security.repository.UserEntityRepository;
@@ -12,6 +15,10 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * sub: 101524744306866890761 (Primary Key 개념)
  * name: 박형진
@@ -44,22 +51,32 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
     //userRequest 정보 -> 회원 프로필 받아야함(loadUser() 메서드를 통해) -> 회원 프로필 완성
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        log.info("userRequest={}", userRequest.getClientRegistration()); //registrationId 로 어떤 OAuth 로 로그인 했는지 확인가능.
-
         OAuth2User oAuth2User = super.loadUser(userRequest);
+        log.info("getAttributes:{}", oAuth2User.getAttributes());
 
-        String provider = userRequest.getClientRegistration().getRegistrationId(); //google
-        String providerId =  oAuth2User.getAttribute("sub"); //101524744306866890761
-        String username = provider + "_" + providerId; //google_101524744306866890761
-        String password = bCryptPasswordEncoder.encode("비밀번호");
-        String email = oAuth2User.getAttribute("email");
+        Oauth2UserInfo oauth2UserInfo = null;
+        if (userRequest.getClientRegistration().getRegistrationId().equals("google")) {
+            oauth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
+        }
+        else if (userRequest.getClientRegistration().getRegistrationId().equals("naver")) {
+            oauth2UserInfo = new NaverUserInfo((Map) oAuth2User.getAttributes().get("response"));
+        }
+
         String role = "ROLE_USER";
+        String email = oauth2UserInfo.getEmail();
+        String provider = oauth2UserInfo.getProvider();
+        String providerId =  oauth2UserInfo.getProviderId();
+        String username = provider + "_" + providerId;
+        String password = bCryptPasswordEncoder.encode("비밀번호");
 
-
-        //회원가입 여부 체크
-        UserEntity userEntity = userEntityRepository.findByUsername(username).orElse(
-            userEntityRepository.save(UserEntity.of(username, password, email, role, provider, providerId))
-        );
+        UserEntity userEntity = null;
+        //이미 가입된 회원이라면
+        boolean present = userEntityRepository.existsByUsername(username);
+        if (userEntityRepository.findByUsername(username).isPresent()) {
+            userEntity = userEntityRepository.findByUsername(username).get();
+        } else {
+            userEntity = userEntityRepository.save(UserEntity.of(username, password, email, role, provider, providerId));
+        }
 
         //리턴값이 Authentication 에 들어가서 Authentication(PrincipalDetails(useDto, attributes))를 만들고
         //Authentication 이 시큐리티 session 에 저장된다.
