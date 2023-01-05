@@ -8,21 +8,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true) // secured 어노테이션 활성화 -> @Secured("ROLE_ADMIN") 붙은 메서드
 @RequiredArgsConstructor
 public class SecurityConfig {
-
     private final PrincipalOauth2UserService principalOauth2UserService;
-
-    //리턴되는 오브젝트를 IOC 에 등록해준다.
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     /**
      * http.csrf().disable() ->
@@ -46,7 +38,7 @@ public class SecurityConfig {
                     .defaultSuccessUrl("/") //Security 에서 로그인 성공하면 해당 url 로 이동
                 .and()
                 .oauth2Login()
-                    .loginPage("/loginForm") //구글 로그인 완료된 뒤 후처리 필요. 액세스토큰+사용자프로필정보 받음
+                    .loginPage("/loginForm") //authenticated 되기 위해 로그인이 필요할 경우 해당 url 로 이동, 구글 로그인 완료된 뒤 후처리 필요. 액세스토큰+사용자프로필정보 받음
                     .userInfoEndpoint()
                     .userService(principalOauth2UserService) //principalOauth2UserService 의 loadUser() 메서드에서 후처리
                     .and()

@@ -32,25 +32,33 @@ import java.util.Map;
  */
 
 public class PrincipalDetails implements UserDetails, OAuth2User {
-    //컴포지션으로 User(또는 DTO) 사용
-    @Getter private UserDto user;
+    @Getter private UserDto user; //컴포지션으로 User(또는 DTO) 사용
+    @Getter private Map<String, Object> attributes;
 
+
+    //일반 로그인
     public PrincipalDetails(UserDto user) {
         this.user = user;
     }
 
-    //Oauth2User Method
+    //Oauth2 로그인
+    public PrincipalDetails(UserDto user, Map<String, Object> attributes) {
+        this.user = user;
+        this.attributes = attributes;
+    }
+
+
+    //Oauth2User Method Override
     @Override
     public String getName() {
         return null;
     }
     @Override
     public Map<String, Object> getAttributes() {
-        return null;
+        return this.attributes;
     }
 
-    //UserDetails Method
-    //해당 User 의 권한을 리턴하는 곳
+    //UserDetails Method Override
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collect =  new ArrayList<>();
@@ -60,6 +68,7 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
                 return user.getRole();
             }
         });
+        //해당 User 의 권한을 리턴
         return collect;
     }
 

@@ -57,7 +57,8 @@ public class IndexController {
 
     @GetMapping("/user")
     @ResponseBody
-    public String user(Authentication authentication) {
+    public String user(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        log.info("{}", principalDetails.getUser());
         return "user";
     }
 
@@ -88,7 +89,7 @@ public class IndexController {
         userDto.setRole("ROLE_USER");
 
         String encPassword = bCryptPasswordEncoder.encode(userDto.getPassword());
-        userEntityRepository.save(UserEntity.of(userDto.getUsername(), encPassword, userDto.getEmail(), userDto.getRole()));
+        userEntityRepository.save(UserEntity.of(userDto.getUsername(), encPassword, userDto.getEmail(), userDto.getRole(), userDto.getProvider(), userDto.getProviderId()));
         return "redirect:/loginForm";
     }
 

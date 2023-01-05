@@ -15,13 +15,18 @@ public class UserDto {
     private String password;
     private String email;
     private String role;
+    private String provider;
+    private String providerId;
+
 
     public static UserDto fromEntity(UserEntity entity) {
         return new UserDto(
                 entity.getUsername(),
                 entity.getPassword(),
                 entity.getEmail(),
-                entity.getRole()
+                entity.getRole(),
+                entity.getProvider(),
+                entity.getProviderId()
         );
     }
 
@@ -32,6 +37,8 @@ public class UserDto {
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
                 ", role='" + role + '\'' +
+                ", provider='" + provider + '\'' +
+                ", providerId='" + providerId + '\'' +
                 '}';
     }
 }
