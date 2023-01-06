@@ -1,2 +1,2 @@
 # security-study
-스프링 시큐리티 학습용 레포지토리
+[Springboot - 시큐리티 특강](https://www.youtube.com/playlist?list=PL93mKxaRDidERCyMaobSLkvSPzYtIk0Ah)
